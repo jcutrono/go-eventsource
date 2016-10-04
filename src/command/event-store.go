@@ -13,6 +13,7 @@ type BankEvent struct {
 	UserId    int
 	Data      string
 	AccountId int
+	Type      string
 }
 
 var (

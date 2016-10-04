@@ -7,7 +7,6 @@ import (
 )
 
 var (
-	ch    *amqp.Channel
 	qname = "task_queue"
 )
 
@@ -17,16 +16,23 @@ func failOnError(err error, msg string) {
 	}
 }
 
-func ConfigurePublish() {
+func getChannel() *amqp.Channel {
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
 	failOnError(err, "Failed to connect to RabbitMQ")
-	defer conn.Close()
+	//defer conn.Close()
 
 	ch, err := conn.Channel()
 	failOnError(err, "Failed to open a channel")
-	defer ch.Close()
+	//defer ch.Close()
 
-	_, err = ch.QueueDeclare(
+	return ch
+}
+
+func ConfigurePublish() {
+
+	ch := getChannel()
+
+	_, err := ch.QueueDeclare(
 		qname, // name
 		false, // durable
 		false, // delete when unused
@@ -37,8 +43,9 @@ func ConfigurePublish() {
 	failOnError(err, "Failed to declare a queue")
 }
 
-func PublishEvent(evt string) {
-	body := evt
+func PublishEvent(body string) {
+
+	ch := getChannel()
 	err := ch.Publish(
 		"",    // exchange
 		qname, // routing key

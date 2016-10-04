@@ -13,6 +13,11 @@ var (
 	Database string
 )
 
+type AccountCreated struct {
+	Name    string
+	Balance int
+}
+
 type BankAccount struct {
 	Name    string
 	Balance int
@@ -29,14 +34,15 @@ func writeAccount(s BankAccount) {
 	}
 }
 
-func findAccount(id int) BankAccount {
+func findAccount(id string) BankAccount {
 	session := GetSession()
 	defer session.Close()
 
 	c := session.DB(Database).C("bankAccounts")
 
 	var result BankAccount
-	c.Find(bson.M{"id": id}).One(&result)
+	//c.FindId(bson.M{"_id": bson.ObjectIdHex(id)}).One(&result)
+	c.Find(bson.M{"name": id}).One(&result)
 
 	return result
 }

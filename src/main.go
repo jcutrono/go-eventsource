@@ -38,7 +38,7 @@ func initializeApi(router *mux.Router) {
 	query.Configure(apiRoutes)
 
 	command.ConfigurePublish()
-	query.ConfigureSubscribe()
+	go query.ConfigureSubscribe()
 
 	apiRoutes.Headers("Access-Control-Allow-Origin", "*")
 	apiRoutes.Headers("Content-Type", "application/json")

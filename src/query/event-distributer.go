@@ -2,11 +2,20 @@ package query
 
 import (
 	"bytes"
+	"encoding/json"
 	"log"
 	"time"
 
 	"github.com/streadway/amqp"
 )
+
+type BankEvent struct {
+	Occurred  time.Time
+	UserId    int
+	Data      string
+	AccountId int
+	Type      string
+}
 
 func failOnError(err error, msg string) {
 	if err != nil {
@@ -57,10 +66,22 @@ func ConfigureSubscribe() {
 		for d := range msgs {
 			log.Printf("Received a message: %s", d.Body)
 			d.Ack(false)
+
+			evt := BankEvent{}
+			json.Unmarshal([]byte(d.Body), &evt)
+
+			switch evt.Type {
+			case "AccountCreated":
+				account := AccountCreated{}
+				json.Unmarshal([]byte(evt.Data), &account)
+				handleAccountCreated(account)
+			default:
+				log.Fatal("Unknown event type")
+			}
+
 			dot_count := bytes.Count(d.Body, []byte("."))
 			t := time.Duration(dot_count)
 			time.Sleep(t * time.Second)
-			log.Printf("Done")
 		}
 	}()
 

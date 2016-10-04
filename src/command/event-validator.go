@@ -2,8 +2,8 @@ package command
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/mux"
 )
@@ -29,8 +29,6 @@ func newAccount(resp http.ResponseWriter, req *http.Request) {
 	var account CreateAccount
 	decoder.Decode(&account)
 
-	fmt.Println(account)
-
 	if account.Name == "" {
 		resp.WriteHeader(http.StatusBadRequest)
 		return
@@ -47,6 +45,8 @@ func newAccount(resp http.ResponseWriter, req *http.Request) {
 	})
 
 	evt := BankEvent{
+		Type:      "AccountCreated",
+		Occurred:  time.Now(),
 		UserId:    0,
 		AccountId: 0,
 		Data:      string(accountStr),
